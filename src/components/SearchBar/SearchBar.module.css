@@ -1,0 +1,15 @@
+.header {
+  width: 100%;
+  justify-items: center;
+  padding: 8px;
+  background-color: rgb(227, 227, 227);
+}
+
+.header form {
+  display: flex;
+  gap: 16px;
+}
+
+.header input {
+  width: 300px;
+}
