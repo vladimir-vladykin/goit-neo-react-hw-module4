@@ -1,12 +1,17 @@
 import { useEffect, useState } from 'react';
+import Modal from 'react-modal';
 import './App.css';
 import { loadImages } from './api';
 import SearchBar from './components/SearchBar/SearchBar';
 import ImageGallery from './components/ImageGallery/ImageGallery';
+import ImageModal from './components/ImageModal/ImageModal';
+
+Modal.setAppElement('#root');
 
 function App() {
   const [searchQuery, setSearchQuery] = useState('');
   const [images, setImages] = useState([]);
+  const [selectedImage, setSelectedImage] = useState(null);
 
   useEffect(() => {
     async function fetchImages() {
@@ -26,10 +31,26 @@ function App() {
     setSearchQuery(query);
   };
 
+  const handleImageClick = image => {
+    console.log('image click');
+    setSelectedImage(image);
+  };
+
+  const handleModalClose = () => {
+    setSelectedImage(null);
+  };
+
+  const isModalOpen = selectedImage !== null;
   return (
     <>
       <SearchBar onSubmit={handleQuerySubmit} />
-      <ImageGallery images={images} />
+      <ImageGallery images={images} onImageClick={handleImageClick} />
+
+      <ImageModal
+        isOpen={isModalOpen}
+        image={selectedImage}
+        onClose={handleModalClose}
+      />
     </>
   );
 }

@@ -1,13 +1,13 @@
 import ImageCard from '../ImageCard/ImageCard';
 import styles from './ImageGallery.module.css';
 
-const ImageGallery = ({ images }) => {
+const ImageGallery = ({ images, onImageClick }) => {
   return (
     <ul className={styles.gallery}>
       {images.map(image => {
         return (
-          <li>
-            <ImageCard image={image} />
+          <li key={image.id}>
+            <ImageCard image={image} onImageClick={() => onImageClick(image)} />
           </li>
         );
       })}
