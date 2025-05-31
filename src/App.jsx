@@ -7,6 +7,7 @@ import ImageGallery from './components/ImageGallery/ImageGallery';
 import ImageModal from './components/ImageModal/ImageModal';
 import LoadMoreBtn from './components/LoadMoreBtn/LoadMoreBtn';
 import { ClipLoader, FadeLoader } from 'react-spinners';
+import ErrorMessage from './components/ErrorMessage/ErrorMessage';
 
 Modal.setAppElement('#root');
 
@@ -19,19 +20,28 @@ function App() {
     currentPage: 0,
   });
   const [isLoading, setLoading] = useState(false);
+  const [isError, setError] = useState(false);
 
   useEffect(() => {
     async function fetchImages() {
-      setLoading(true);
-      const { images, totalImageCount } = await loadImages(searchQuery, 1);
-      setImagesState(prevState => {
-        return {
-          ...prevState,
-          images: images,
-          totalImagesCount: totalImageCount,
-          currentPage: 1,
-        };
-      });
+      try {
+        setError(false);
+        setLoading(true);
+        const { images, totalImageCount } = await loadImages(searchQuery, 1);
+        setImagesState(prevState => {
+          return {
+            ...prevState,
+            images: images,
+            totalImagesCount: totalImageCount,
+            currentPage: 1,
+          };
+        });
+      } catch {
+        setError(true);
+      } finally {
+        setLoading(false);
+      }
+
       setLoading(false);
     }
 
@@ -59,17 +69,26 @@ function App() {
   };
 
   async function loadMoreImages() {
-    setLoading(true);
-    const nextPage = imagesState.currentPage + 1;
-    const { images, totalImageCount } = await loadImages(searchQuery, nextPage);
+    try {
+      setError(false);
+      setLoading(true);
+      const nextPage = imagesState.currentPage + 1;
+      const { images, totalImageCount } = await loadImages(
+        searchQuery,
+        nextPage
+      );
 
-    setImagesState({
-      ...imagesState,
-      images: [...imagesState.images, ...images],
-      totalImagesCount: totalImageCount,
-      currentPage: nextPage,
-    });
-    setLoading(false);
+      setImagesState({
+        ...imagesState,
+        images: [...imagesState.images, ...images],
+        totalImagesCount: totalImageCount,
+        currentPage: nextPage,
+      });
+    } catch {
+      setError(true);
+    } finally {
+      setLoading(false);
+    }
   }
 
   const handleLoadMoreClick = () => {
@@ -90,6 +109,7 @@ function App() {
       />
 
       {loadMoreVisible && <LoadMoreBtn onClick={handleLoadMoreClick} />}
+      {isError && <ErrorMessage />}
       <ClipLoader
         color="#ffffff"
         cssOverride={{
