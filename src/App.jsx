@@ -11,21 +11,23 @@ Modal.setAppElement('#root');
 
 function App() {
   const [searchQuery, setSearchQuery] = useState('');
-  // const [images, setImages] = useState([]);
-  // const [selectedImage, setSelectedImage] = useState(null);
   const [imagesState, setImagesState] = useState({
     images: [],
     totalImagesCount: 0,
     selectedImage: null,
+    currentPage: 0,
   });
 
   useEffect(() => {
     async function fetchImages() {
       const { images, totalImageCount } = await loadImages(searchQuery, 1);
-      setImagesState({
-        ...imagesState,
-        images: images, // todo actually should recreate array with new values?
-        totalImagesCount: totalImageCount,
+      setImagesState(prevState => {
+        return {
+          ...prevState,
+          images: images,
+          totalImagesCount: totalImageCount,
+          currentPage: 1,
+        };
       });
     }
 
@@ -52,8 +54,20 @@ function App() {
     });
   };
 
+  async function loadMoreImages() {
+    const nextPage = imagesState.currentPage + 1;
+    const { images, totalImageCount } = await loadImages(searchQuery, nextPage);
+
+    setImagesState({
+      ...imagesState,
+      images: [...imagesState.images, ...images],
+      totalImagesCount: totalImageCount,
+      currentPage: nextPage,
+    });
+  }
+
   const handleLoadMoreClick = () => {
-    console.log('load more click');
+    loadMoreImages();
   };
 
   const isModalOpen = imagesState.selectedImage !== null;
