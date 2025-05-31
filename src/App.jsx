@@ -6,6 +6,7 @@ import SearchBar from './components/SearchBar/SearchBar';
 import ImageGallery from './components/ImageGallery/ImageGallery';
 import ImageModal from './components/ImageModal/ImageModal';
 import LoadMoreBtn from './components/LoadMoreBtn/LoadMoreBtn';
+import { ClipLoader, FadeLoader } from 'react-spinners';
 
 Modal.setAppElement('#root');
 
@@ -17,9 +18,11 @@ function App() {
     selectedImage: null,
     currentPage: 0,
   });
+  const [isLoading, setLoading] = useState(false);
 
   useEffect(() => {
     async function fetchImages() {
+      setLoading(true);
       const { images, totalImageCount } = await loadImages(searchQuery, 1);
       setImagesState(prevState => {
         return {
@@ -29,6 +32,7 @@ function App() {
           currentPage: 1,
         };
       });
+      setLoading(false);
     }
 
     if (searchQuery !== '') {
@@ -55,6 +59,7 @@ function App() {
   };
 
   async function loadMoreImages() {
+    setLoading(true);
     const nextPage = imagesState.currentPage + 1;
     const { images, totalImageCount } = await loadImages(searchQuery, nextPage);
 
@@ -64,6 +69,7 @@ function App() {
       totalImagesCount: totalImageCount,
       currentPage: nextPage,
     });
+    setLoading(false);
   }
 
   const handleLoadMoreClick = () => {
@@ -72,6 +78,7 @@ function App() {
 
   const isModalOpen = imagesState.selectedImage !== null;
   const loadMoreVisible =
+    !isLoading &&
     imagesState.images.length > 0 &&
     imagesState.images.length < imagesState.totalImagesCount;
   return (
@@ -83,6 +90,16 @@ function App() {
       />
 
       {loadMoreVisible && <LoadMoreBtn onClick={handleLoadMoreClick} />}
+      <ClipLoader
+        color="#ffffff"
+        cssOverride={{
+          display: 'block',
+          margin: '0 auto',
+        }}
+        loading={isLoading}
+        size={150}
+        aria-label="Loading Spinner"
+      />
 
       <ImageModal
         isOpen={isModalOpen}
